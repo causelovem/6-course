@@ -611,7 +611,8 @@ int main(int argc, char **argv)
         else if(type == "UR")
         {
             cout << "Generating Uniform Random graph" << endl;
-            uniform_random(src_ids, dst_ids, weights, vertices_count, avg_degree, directed, weighted, edges_count);
+            // uniform_random(src_ids, dst_ids, weights, vertices_count, avg_degree, directed, weighted, edges_count);
+            uniform_random(src_ids, dst_ids, weights, vertices_count, edges_count, threads, directed, weighted);
         }
         else
         {
