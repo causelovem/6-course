@@ -1,0 +1,64 @@
+I
+./graphCSR/RMAT17CSR has 131072 nodes and 4194304 edges      SSSP: 7,066000 ms. <filter>
+./graphCSR/RMAT18CSR has 262144 nodes and 8388608 edges      SSSP: 10,847000 ms. <filter>
+./graphCSR/RMAT19CSR has 524288 nodes and 16777216 edges      SSSP: 22,935000 ms. <filter>
+./graphCSR/RMAT20CSR has 1048576 nodes and 33554432 edges      SSSP: 56,131000 ms. <filter>
+./graphCSR/RMAT21CSR has 2097152 nodes and 67108864 edges      SSSP: 123,949000 ms. <filter>
+./graphCSR/RMAT22CSR has 4194304 nodes and 134217728 edges      SSSP: 318,321000 ms. <filter>
+./graphCSR/RMAT23CSR has 8388608 nodes and 268435456 edges      SSSP: 640,123000 ms. <filter>
+./graphCSR/RMAT24CSR has 16777216 nodes and 536870912 edges      SSSP: 543,473000 ms. <filter>
+./graphCSR/RMAT25CSR has 33554432 nodes and 1073741824 edges      SSSP: 1238,337000 ms. <filter>
+./graphCSR/SSCA217CSR has 131072 nodes and 1358656 edges      SSSP: 0,337000 ms. <filter>
+./graphCSR/SSCA218CSR has 262144 nodes and 2724762 edges      SSSP: 0,822000 ms. <filter>
+./graphCSR/SSCA219CSR has 524288 nodes and 5456275 edges      SSSP: 0,629000 ms. <filter>
+./graphCSR/SSCA220CSR has 1048576 nodes and 10902287 edges      SSSP: 1,214000 ms. <filter>
+./graphCSR/SSCA221CSR has 2097152 nodes and 21794753 edges      SSSP: 0,523000 ms. <filter>
+./graphCSR/SSCA222CSR has 4194304 nodes and 43580024 edges      SSSP: 0,491000 ms. <filter>
+./graphCSR/SSCA223CSR has 8388608 nodes and 87194904 edges      SSSP: 0,789000 ms. <filter>
+./graphCSR/SSCA224CSR has 16777216 nodes and 174408603 edges      SSSP: 1,631000 ms. <filter>
+./graphCSR/SSCA225CSR has 33554432 nodes and 348853625 edges      SSSP: 0,517000 ms. <filter>
+./graphCSR/UR17CSR has 131072 nodes and 4194304 edges      SSSP: 10,912000 ms. <filter>
+./graphCSR/UR18CSR has 262144 nodes and 8388608 edges      SSSP: 20,501000 ms. <filter>
+./graphCSR/UR19CSR has 524288 nodes and 16777216 edges      SSSP: 54,789000 ms. <filter>
+./graphCSR/UR20CSR has 1048576 nodes and 33554432 edges      SSSP: 142,737000 ms. <filter>
+./graphCSR/UR21CSR has 2097152 nodes and 67108864 edges      SSSP: 343,500000 ms. <filter>
+./graphCSR/UR22CSR has 4194304 nodes and 134217728 edges      SSSP: 884,509000 ms. <filter>
+./graphCSR/UR23CSR has 8388608 nodes and 268435456 edges      SSSP: 1992,929000 ms. <filter>
+./graphCSR/UR24CSR has 16777216 nodes and 536870912 edges      SSSP: 4428,678000 ms. <filter>
+./graphCSR/UR25CSR has 33554432 nodes and 1073741824 edges      SSSP: 9899,616000 ms. <filter>
+
+
+
+
+II
+,/graphCSR/RMAT17CSR has 131072 nodes and 4194304 edges      SSSP: 7,367000 ms, <filter>
+,/graphCSR/RMAT18CSR has 262144 nodes and 8388608 edges      SSSP: 10,888000 ms, <filter>
+,/graphCSR/RMAT19CSR has 524288 nodes and 16777216 edges      SSSP: 23,056000 ms, <filter>
+,/graphCSR/RMAT20CSR has 1048576 nodes and 33554432 edges      SSSP: 56,262000 ms, <filter>
+,/graphCSR/RMAT21CSR has 2097152 nodes and 67108864 edges      SSSP: 123,425000 ms, <filter>
+,/graphCSR/RMAT22CSR has 4194304 nodes and 134217728 edges      SSSP: 319,769000 ms, <filter>
+,/graphCSR/RMAT23CSR has 8388608 nodes and 268435456 edges      SSSP: 642,087000 ms, <filter>
+,/graphCSR/RMAT24CSR has 16777216 nodes and 536870912 edges      SSSP: 544,815000 ms, <filter>
+,/graphCSR/RMAT25CSR has 33554432 nodes and 1073741824 edges      SSSP: 1245,300000 ms, <filter>
+,/graphCSR/SSCA217CSR has 131072 nodes and 1358656 edges      SSSP: 0,321000 ms, <filter>
+,/graphCSR/SSCA218CSR has 262144 nodes and 2724762 edges      SSSP: 0,821000 ms, <filter>
+,/graphCSR/SSCA219CSR has 524288 nodes and 5456275 edges      SSSP: 0,519000 ms, <filter>
+,/graphCSR/SSCA220CSR has 1048576 nodes and 10902287 edges      SSSP: 1,439000 ms, <filter>
+,/graphCSR/SSCA221CSR has 2097152 nodes and 21794753 edges      SSSP: 0,407000 ms, <filter>
+,/graphCSR/SSCA222CSR has 4194304 nodes and 43580024 edges      SSSP: 0,495000 ms, <filter>
+,/graphCSR/SSCA223CSR has 8388608 nodes and 87194904 edges      SSSP: 0,764000 ms, <filter>
+,/graphCSR/SSCA224CSR has 16777216 nodes and 174408603 edges      SSSP: 1,620000 ms, <filter>
+,/graphCSR/SSCA225CSR has 33554432 nodes and 348853625 edges      SSSP: 0,540000 ms, <filter>
+,/graphCSR/UR17CSR has 131072 nodes and 4194304 edges      SSSP: 10,057000 ms, <filter>
+,/graphCSR/UR18CSR has 262144 nodes and 8388608 edges      SSSP: 20,409000 ms, <filter>
+,/graphCSR/UR19CSR has 524288 nodes and 16777216 edges      SSSP: 55,208000 ms, <filter>
+,/graphCSR/UR20CSR has 1048576 nodes and 33554432 edges      SSSP: 141,531000 ms, <filter>
+,/graphCSR/UR21CSR has 2097152 nodes and 67108864 edges      SSSP: 344,543000 ms, <filter>
+,/graphCSR/UR22CSR has 4194304 nodes and 134217728 edges      SSSP: 883,144000 ms, <filter>
+,/graphCSR/UR23CSR has 8388608 nodes and 268435456 edges      SSSP: 1997,401000 ms, <filter>
+,/graphCSR/UR24CSR has 16777216 nodes and 536870912 edges      SSSP: 4416,710000 ms, <filter>
+,/graphCSR/UR25CSR has 33554432 nodes and 1073741824 edges      SSSP: 9857,208000 ms, <filter>
+
+
+
+
