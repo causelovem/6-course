@@ -34,8 +34,6 @@ private:
     double hx, hy, tau;
     int currT;
 
-    int numThreads;
-
     double f0(double x, double y, double t);
     double f1(double x, double y, double t);
     double u0(double x, double y, double t);
@@ -43,7 +41,7 @@ private:
     void globalCoord(int i, int j, int &globI, int &globJ);
 
 public:
-    DistributedMatrix(int _N, int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY, int _numThreads);
+    DistributedMatrix(int _N, int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY);
     void initialize();
     void sync();
     double calcDelta();
@@ -51,7 +49,7 @@ public:
     ~DistributedMatrix();
 };
 
-DistributedMatrix::DistributedMatrix(int _N, int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY, int _numThreads)
+DistributedMatrix::DistributedMatrix(int _N, int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY)
 {
     N = _N;
     K = _K;
@@ -64,10 +62,9 @@ DistributedMatrix::DistributedMatrix(int _N, int _K, double _Lx, double _Ly, dou
     myRank = _myRank;
     procX = _procX;
     procY = _procY;
-    numThreads = _numThreads;
 
     myY = myRank / procX;
-    myX = myRank % procY;
+    myX = myRank % procX;
 
     tau = double(T) / K;
     hx = double(Lx) / N;
@@ -331,14 +328,13 @@ void DistributedMatrix::makeIter()
     //     {
     //         cout << " < " << myRank << " > " << endl;
     //         // cout << "data0" << endl;
-    //         // for(int i = localY + 1; i > -1; i--)
+    //         // for(int i = 0; i < localY + 2; i++)
     //         // {
     //         //     for(int j = 0; j < localX + 2; j++)
     //         //         cout << data0[i][j] << " ";
     //         //     cout << endl;
     //         // }
     //         cout << "data1" << endl;
-    //         // for(int i = localY + 1; i >= 0; i--)
     //         for(int i = 0; i < localY + 2; i++)
     //         {
     //             for(int j = 0; j < localX + 2; j++)
@@ -353,6 +349,7 @@ void DistributedMatrix::makeIter()
 
     double** newData0 = new double* [localY + 2];
     double** newData1 = new double* [localY + 2];
+    #pragma omp parallel for
     for(int i = 0; i < localY + 2; i++)
     {
         newData0[i] = new double[localX + 2];
@@ -360,6 +357,7 @@ void DistributedMatrix::makeIter()
     }
 
     int globI, globJ;
+    #pragma omp parallel for
     for(int i = 1; i < localY + 1; i++)
         for(int j = 1; j < localX + 1; j++)
         {
@@ -404,6 +402,7 @@ void DistributedMatrix::makeIter()
             }
         }
 
+    #pragma omp parallel for
     for(int i = 0; i < localY + 2; i++)
     {
         delete[] data0[i];
