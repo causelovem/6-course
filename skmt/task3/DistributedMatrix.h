@@ -1,6 +1,7 @@
 #include <cmath>
 #include <omp.h>
 #include "mpi.h"
+#include <iostream>
 
 using namespace std;
 
@@ -413,12 +414,20 @@ void DistributedMatrix::makeIter()
     data0 = newData0;
     data1 = newData1;
 
-    if (myY == procY - 1)
-        MPI_Send(&data1[localY][1], localX, MPI_DOUBLE, neighbours[5], 0, MPI_COMM_WORLD);
-    
-    if (myY == 0)
-        MPI_Recv(&data1[1][1], localX, MPI_DOUBLE, neighbours[1], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    if (nProc == 1)
+    {
+        for(int i = 1; i < localY + 1; i++)
+            data1[1][i] = data1[localY][i];
+    }
+    else
+    {
+        if (myY == procY - 1)
+            MPI_Send(&data1[localY][1], localX, MPI_DOUBLE, neighbours[5], 0, MPI_COMM_WORLD);
+        
+        if (myY == 0)
+            MPI_Recv(&data1[1][1], localX, MPI_DOUBLE, neighbours[1], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
+    }
     MPI_Barrier(MPI_COMM_WORLD);
 
     currT++;

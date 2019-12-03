@@ -1,6 +1,7 @@
 #include "mpi.h"
 #include "DistributedMatrix.h"
 #include <stdlib.h>
+#include <iostream>
 
 using namespace std;
 
