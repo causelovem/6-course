@@ -57,7 +57,7 @@ DistributedMatrix::DistributedMatrix(int _N, int _K, double _Lx, double _Ly, dou
     Lx = _Lx;
     Ly = _Ly;
     T = _T;
-    currT = 1;
+    currT = 0;
 
     nProc = _nProc;
     myRank = _myRank;
@@ -68,8 +68,8 @@ DistributedMatrix::DistributedMatrix(int _N, int _K, double _Lx, double _Ly, dou
     myX = myRank % procX;
 
     tau = double(T) / K;
-    hx = double(Lx) / N;
-    hy = double(Ly) / N;
+    hx = double(Lx) / (N - 1);
+    hy = double(Ly) / (N - 1);
 
     localX = N / procX;
     localY = N / procY;
@@ -80,6 +80,7 @@ DistributedMatrix::DistributedMatrix(int _N, int _K, double _Lx, double _Ly, dou
     
     data0 = new double* [localY + 2];
     data1 = new double* [localY + 2];
+    // #pragma omp parallel for
     for (int i = 0; i < localY + 2; i++) 
     {
         data0[i] = new double[localX + 2];
@@ -158,23 +159,27 @@ void DistributedMatrix::globalCoord(int i, int j, int &globI, int &globJ)
 double DistributedMatrix::f0(double x, double y, double t)
 {
     // return sin(PI * x / Lx) * cos(t + 2 * PI) + 2 * (PI / Lx) * (PI / Lx) * sin(PI * x / Lx) * sin(t + 2 * PI);
-    return sin(PI * x / Lx) * cos(t + 2 * PI) + 2 * (PI / Lx) * (PI / Lx) * sin(PI * x / Lx) * sin(t + 2 * PI) - 2 * PI * PI / (Lx * Ly) * cos(PI * x / Lx) * cos(2 * PI * y / Ly) * sin(t + 2 * PI);
+    // return sin(PI * x / Lx) * cos(t + 2 * PI) + 2 * (PI / Lx) * (PI / Lx) * sin(PI * x / Lx) * sin(t + 2 * PI) - 2 * PI * PI / (Lx * Ly) * cos(PI * x / Lx) * cos(2 * PI * y / Ly) * sin(t + 2 * PI);
+    return sin(PI * x / Lx) * cos(t + 2 * PI) + 2 * (PI / Lx) * (PI / Lx) * sin(PI * x / Lx) * sin(t) - 2 * PI * PI / (Lx * Ly) * cos(PI * x / Lx) * cos(2 * PI * y / Ly) * sin(t);
 }
 
 double DistributedMatrix::f1(double x, double y, double t)
 {
     // return sin(PI * x / Lx) * sin(2 * PI * y / Ly) * cos(t + 2 * PI) + PI * PI * (1 / (Lx * Lx) + 8 / (Ly * Ly)) * sin(PI * x / Lx) * sin(2 * PI * y / Ly) * sin(t + 2 * PI) - 2 * PI * PI / (Lx * Ly) * cos(PI * x / Lx) * cos(2 * PI * y / Ly) * sin(t + 2 * PI);
-    return sin(PI * x / Lx) * sin(2 * PI * y / Ly) * cos(t + 2 * PI) + PI * PI * (1 / (Lx * Lx) + 8 / (Ly * Ly)) * sin(PI * x / Lx) * sin(2 * PI * y / Ly) * sin(t + 2 * PI);
+    // return sin(PI * x / Lx) * sin(2 * PI * y / Ly) * cos(t + 2 * PI) + PI * PI * (1 / (Lx * Lx) + 8 / (Ly * Ly)) * sin(PI * x / Lx) * sin(2 * PI * y / Ly) * sin(t + 2 * PI);
+    return sin(PI * x / Lx) * sin(2 * PI * y / Ly) * cos(t) + PI * PI * (1 / (Lx * Lx) + 8 / (Ly * Ly)) * sin(PI * x / Lx) * sin(2 * PI * y / Ly) * sin(t);
 }
 
 double DistributedMatrix::u0(double x, double y, double t)
 {
-    return sin(PI * x / Lx) * sin(t + 2 * PI);
+    // return sin(PI * x / Lx) * sin(t + 2 * PI);
+    return sin(PI * x / Lx) * sin(t);
 }
 
 double DistributedMatrix::u1(double x, double y, double t)
 {
-    return sin(PI * x / Lx) * sin(2 * PI * y / Ly) * sin(t + 2 * PI);
+    // return sin(PI * x / Lx) * sin(2 * PI * y / Ly) * sin(t + 2 * PI);
+    return sin(PI * x / Lx) * sin(2 * PI * y / Ly) * sin(t);
 }
 
 void DistributedMatrix::initialize()
@@ -222,6 +227,7 @@ void DistributedMatrix::sync()
             }
 
             if ((myY == 0) && ((i == 0) ||  (i == 2)))
+            // if (myY == 0)
                 k++;
 
             tmpSend[0] = data0[k][l];
@@ -260,13 +266,17 @@ void DistributedMatrix::sync()
                 if (myY == 0)
                     k = 2;
 
-                MPI_Sendrecv(&data0[k][1], localX, MPI_DOUBLE, neighbours[i], 1, &data0[localY + 1][1], localX, MPI_DOUBLE, neighbours[(4 + i) % 8], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&data0[1][1], localX, MPI_DOUBLE, neighbours[i], 1, &data0[localY + 1][1], localX, MPI_DOUBLE, neighbours[(4 + i) % 8], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 MPI_Sendrecv(&data1[k][1], localX, MPI_DOUBLE, neighbours[i], 1, &data1[localY + 1][1], localX, MPI_DOUBLE, neighbours[(4 + i) % 8], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
             else // (i == 5)
             {
+                int k = 0;
+                if (myY == procY - 1)
+                    k = 1;
+
                 MPI_Sendrecv(&data0[localY][1], localX, MPI_DOUBLE, neighbours[i], 1, &data0[0][1], localX, MPI_DOUBLE, neighbours[(4 + i) % 8], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                MPI_Sendrecv(&data1[localY][1], localX, MPI_DOUBLE, neighbours[i], 1, &data1[0][1], localX, MPI_DOUBLE, neighbours[(4 + i) % 8], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&data1[localY - k][1], localX, MPI_DOUBLE, neighbours[i], 1, &data1[0][1], localX, MPI_DOUBLE, neighbours[(4 + i) % 8], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
         } else
         if (i % 4 == 3)
@@ -275,6 +285,7 @@ void DistributedMatrix::sync()
             if (i == 7)
                 k = 1;
 
+            // #pragma omp parallel for
             for(int j = 1; j < localY + 1; j++)
             {
                 tmp2Send[0][j - 1] = data0[j][k];
@@ -287,6 +298,7 @@ void DistributedMatrix::sync()
             if (i == 7)
                 k = localX + 1;
 
+            // #pragma omp parallel for
             for(int j = 1; j < localY + 1; j++)
             {
                 data0[j][k] = tmp2Recv[0][j - 1];
@@ -306,20 +318,21 @@ double DistributedMatrix::calcDelta()
         for(int j = 1; j < localX + 1; j++)
         {
             globalCoord(i - 1, j - 1, globI, globJ);
-            localMax = max(abs(data0[i][j] - u0(globJ * hx, globI * hy, (currT - 1) * tau)), localMax);
-            localMax = max(abs(data1[i][j] - u1(globJ * hx, globI * hy, (currT - 1) * tau)), localMax);
+            localMax = max(abs(data0[i][j] - u0(globJ * hx, globI * hy, currT * tau)), localMax);
+            localMax = max(abs(data1[i][j] - u1(globJ * hx, globI * hy, currT * tau)), localMax);
         }
 
     MPI_Reduce(&localMax, &globalMax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
     if(myRank == 0)
-        cout << (currT - 1) << " : " << globalMax << endl;
+        cout << currT << " : " << globalMax << endl;
 
     return globalMax;
 }
 
 void DistributedMatrix::makeIter()
 {
+    currT++;
     sync();
 
     // MPI_Barrier(MPI_COMM_WORLD);
@@ -358,6 +371,7 @@ void DistributedMatrix::makeIter()
     }
 
     int globI, globJ;
+
     #pragma omp parallel for
     for(int i = 1; i < localY + 1; i++)
         for(int j = 1; j < localX + 1; j++)
@@ -366,37 +380,40 @@ void DistributedMatrix::makeIter()
             if ((globJ == 0) || (globJ == N - 1))
             {
                 // u1x - 1 рода, u2x - 1 рода
-                newData0[i][j] = 0;
-                newData1[i][j] = 0;
+                newData0[i][j] = 0.0;
+                newData1[i][j] = 0.0;
             } else
             if (globI == N - 1)
             {
                 // u1y - 2 рода, u2y - периодические
-                double laplasV0 = (data1[i][j - 1] - 2 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
+                double laplasV0 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
+                // double nablaDivV0 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
+                double nablaDivV0 = laplasV0;
                 laplasV0 += (data1[i - 1][j] - 2 * data1[i][j] + data1[i + 1][j]) / (hy * hy);
-                double nablaDivV0 = (data1[i][j - 1] - 2 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
-                nablaDivV0 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (4 * hx * hy);
+                nablaDivV0 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (4.0 * hx * hy);
 
                 newData1[i][j] = tau * (laplasV0 + nablaDivV0 + f1(globJ * hx, globI * hy, currT * tau)) + data1[i][j];
 
-                newData0[i][j] = (4 * data0[i - 1][j] - data0[i - 2][j]) / 3; // 2 род
+                newData0[i][j] = (4.0 * data0[i - 1][j] - data0[i - 2][j]) / 3.0; // 2 род
             } else
             if (globI == 0)
             {
                 // u1y - 2 рода
-                newData0[i][j] = (4 * data0[i + 1][j] - data0[i + 2][j]) / 3;
+                newData0[i][j] = (4.0 * data0[i + 1][j] - data0[i + 2][j]) / 3.0;
             } else
             {
                 // Остальные точки
-                double laplasV0 = (data0[i][j - 1] - 2 * data0[i][j] + data0[i][j + 1]) / (hx * hx);
+                double laplasV0 = (data0[i][j - 1] - 2.0 * data0[i][j] + data0[i][j + 1]) / (hx * hx);
+                // double nablaDivV0 = (data0[i][j - 1] - 2.0 * data0[i][j] + data0[i][j + 1]) / (hx * hx);
+                double nablaDivV0 = laplasV0;
                 laplasV0 += (data0[i - 1][j] - 2 * data0[i][j] + data0[i + 1][j]) / (hy * hy);
-                double nablaDivV0 = (data0[i][j - 1] - 2 * data0[i][j] + data0[i][j + 1]) / (hx * hx);
-                nablaDivV0 += (data1[i + 1][j + 1] - data1[i - 1][j + 1] - data1[i + 1][j - 1] + data1[i - 1][j - 1]) / (4 * hx * hy);
+                nablaDivV0 += (data1[i + 1][j + 1] - data1[i - 1][j + 1] - data1[i + 1][j - 1] + data1[i - 1][j - 1]) / (4.0 * hx * hy);
 
-                double laplasV1 = (data1[i][j - 1] - 2 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
+                double laplasV1 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
+                // double nablaDivV1 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
+                double nablaDivV1 = laplasV1;
                 laplasV1 += (data1[i - 1][j] - 2 * data1[i][j] + data1[i + 1][j]) / (hy * hy);
-                double nablaDivV1 = (data1[i][j - 1] - 2 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
-                nablaDivV1 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (4 * hx * hy);
+                nablaDivV1 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (4.0 * hx * hy);
 
                 newData0[i][j] = tau * (laplasV0 + nablaDivV0 + f0(globJ * hx, globI * hy, currT * tau)) + data0[i][j];
                 newData1[i][j] = tau * (laplasV1 + nablaDivV1 + f1(globJ * hx, globI * hy, currT * tau)) + data1[i][j];
@@ -416,6 +433,7 @@ void DistributedMatrix::makeIter()
 
     if (nProc == 1)
     {
+        #pragma omp parallel for
         for(int i = 1; i < localY + 1; i++)
             data1[1][i] = data1[localY][i];
     }
@@ -428,7 +446,6 @@ void DistributedMatrix::makeIter()
             MPI_Recv(&data1[1][1], localX, MPI_DOUBLE, neighbours[1], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
     }
-    MPI_Barrier(MPI_COMM_WORLD);
 
-    currT++;
+    MPI_Barrier(MPI_COMM_WORLD);
 }
