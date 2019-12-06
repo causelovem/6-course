@@ -30,7 +30,8 @@ private:
     // Кол-во процессов в строке/столбце
     int procX, procY;
 
-    long int N, K;
+    long int K;
+    int N;
     double Lx, Ly, T;
     double hx, hy, tau;
     int currT;
@@ -42,7 +43,7 @@ private:
     void globalCoord(int i, int j, int &globI, int &globJ);
 
 public:
-    DistributedMatrix(int _N, int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY);
+    DistributedMatrix(int _N, long int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY);
     void initialize();
     void sync();
     double calcDelta();
@@ -50,7 +51,7 @@ public:
     ~DistributedMatrix();
 };
 
-DistributedMatrix::DistributedMatrix(int _N, int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY)
+DistributedMatrix::DistributedMatrix(int _N, long int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY)
 {
     N = _N;
     K = _K;
@@ -372,6 +373,11 @@ void DistributedMatrix::makeIter()
 
     int globI, globJ;
 
+    double hx2 = hx * hx;
+    double hy2 = hy * hy;
+    double fourhxhy = 4.0 * hx * hy;
+    double currTau = currT * tau;
+
     #pragma omp parallel for
     for(int i = 1; i < localY + 1; i++)
         for(int j = 1; j < localX + 1; j++)
@@ -386,13 +392,13 @@ void DistributedMatrix::makeIter()
             if (globI == N - 1)
             {
                 // u1y - 2 рода, u2y - периодические
-                double laplasV0 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
-                // double nablaDivV0 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
-                double nablaDivV0 = laplasV0;
-                laplasV0 += (data1[i - 1][j] - 2 * data1[i][j] + data1[i + 1][j]) / (hy * hy);
-                nablaDivV0 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (4.0 * hx * hy);
+                double laplasV1 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx2);
+                double nablaDivV1 = (data1[i - 1][j] - 2.0 * data1[i][j] + data1[i + 1][j]) / (hy2);
+                // laplasV1 += (data1[i - 1][j] - 2.0 * data1[i][j] + data1[i + 1][j]) / (hy * hy);
+                laplasV1 += nablaDivV1;
+                nablaDivV1 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (fourhxhy);
 
-                newData1[i][j] = tau * (laplasV0 + nablaDivV0 + f1(globJ * hx, globI * hy, currT * tau)) + data1[i][j];
+                newData1[i][j] = tau * (laplasV1 + nablaDivV1 + f1(globJ * hx, globI * hy, currTau)) + data1[i][j];
 
                 newData0[i][j] = (4.0 * data0[i - 1][j] - data0[i - 2][j]) / 3.0; // 2 род
             } else
@@ -403,20 +409,18 @@ void DistributedMatrix::makeIter()
             } else
             {
                 // Остальные точки
-                double laplasV0 = (data0[i][j - 1] - 2.0 * data0[i][j] + data0[i][j + 1]) / (hx * hx);
-                // double nablaDivV0 = (data0[i][j - 1] - 2.0 * data0[i][j] + data0[i][j + 1]) / (hx * hx);
+                double laplasV0 = (data0[i][j - 1] - 2.0 * data0[i][j] + data0[i][j + 1]) / (hx2);
                 double nablaDivV0 = laplasV0;
-                laplasV0 += (data0[i - 1][j] - 2 * data0[i][j] + data0[i + 1][j]) / (hy * hy);
-                nablaDivV0 += (data1[i + 1][j + 1] - data1[i - 1][j + 1] - data1[i + 1][j - 1] + data1[i - 1][j - 1]) / (4.0 * hx * hy);
+                laplasV0 += (data0[i - 1][j] - 2.0 * data0[i][j] + data0[i + 1][j]) / (hy2);
+                nablaDivV0 += (data1[i + 1][j + 1] - data1[i - 1][j + 1] - data1[i + 1][j - 1] + data1[i - 1][j - 1]) / (fourhxhy);
 
-                double laplasV1 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
-                // double nablaDivV1 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx * hx);
-                double nablaDivV1 = laplasV1;
-                laplasV1 += (data1[i - 1][j] - 2 * data1[i][j] + data1[i + 1][j]) / (hy * hy);
-                nablaDivV1 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (4.0 * hx * hy);
+                double laplasV1 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx2);
+                double nablaDivV1 = (data1[i - 1][j] - 2.0 * data1[i][j] + data1[i + 1][j]) / (hy2);
+                laplasV1 += nablaDivV1;
+                nablaDivV1 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (fourhxhy);
 
-                newData0[i][j] = tau * (laplasV0 + nablaDivV0 + f0(globJ * hx, globI * hy, currT * tau)) + data0[i][j];
-                newData1[i][j] = tau * (laplasV1 + nablaDivV1 + f1(globJ * hx, globI * hy, currT * tau)) + data1[i][j];
+                newData0[i][j] = tau * (laplasV0 + nablaDivV0 + f0(globJ * hx, globI * hy, currTau)) + data0[i][j];
+                newData1[i][j] = tau * (laplasV1 + nablaDivV1 + f1(globJ * hx, globI * hy, currTau)) + data1[i][j];
             }
         }
 
@@ -444,7 +448,6 @@ void DistributedMatrix::makeIter()
         
         if (myY == 0)
             MPI_Recv(&data1[1][1], localX, MPI_DOUBLE, neighbours[1], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
