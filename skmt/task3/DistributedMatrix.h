@@ -30,7 +30,7 @@ private:
     // Кол-во процессов в строке/столбце
     int procX, procY;
 
-    long int K;
+    double K;
     int N;
     double Lx, Ly, T;
     double hx, hy, tau;
@@ -43,7 +43,7 @@ private:
     void globalCoord(int i, int j, int &globI, int &globJ);
 
 public:
-    DistributedMatrix(int _N, long int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY);
+    DistributedMatrix(int _N, double _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY);
     void initialize();
     void sync();
     double calcDelta();
@@ -51,7 +51,7 @@ public:
     ~DistributedMatrix();
 };
 
-DistributedMatrix::DistributedMatrix(int _N, long int _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY)
+DistributedMatrix::DistributedMatrix(int _N, double _K, double _Lx, double _Ly, double _T, int _nProc, int _myRank, int _procX, int _procY)
 {
     N = _N;
     K = _K;

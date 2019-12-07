@@ -15,7 +15,8 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &nProc);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    long int K = 1e11;
+    // long int K = 1e11;
+    double K = 1e11;
     double Lx = 1; 
     double Ly = 1;
     double T = 1;
@@ -32,7 +33,7 @@ int main(int argc, char **argv)
     grid.calcDelta();
 
     double time = MPI_Wtime();
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 20; i++)
     {
         grid.makeIter();
         grid.calcDelta();
