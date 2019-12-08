@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     // long int K = 1e11;
-    double K = 1e11;
+    double K = 1e13;
     double Lx = 1; 
     double Ly = 1;
     double T = 1;

@@ -68,7 +68,7 @@ DistributedMatrix::DistributedMatrix(int _N, double _K, double _Lx, double _Ly, 
     myY = myRank / procX;
     myX = myRank % procX;
 
-    tau = double(T) / K;
+    tau = double(T) / (K - 1);
     hx = double(Lx) / (N - 1);
     hy = double(Ly) / (N - 1);
 
@@ -227,9 +227,11 @@ void DistributedMatrix::sync()
                 l = localX;
             }
 
-            if ((myY == 0) && ((i == 0) ||  (i == 2)))
-            // if (myY == 0)
+            if ((myY == 0) && ((i == 0) || (i == 2)))
                 k++;
+
+            if ((myY == procY - 1) && ((i == 4) || (i == 6)))
+                k--;
 
             tmpSend[0] = data0[k][l];
             tmpSend[1] = data1[k][l];
@@ -286,7 +288,7 @@ void DistributedMatrix::sync()
             if (i == 7)
                 k = 1;
 
-            // #pragma omp parallel for
+            #pragma omp parallel for
             for(int j = 1; j < localY + 1; j++)
             {
                 tmp2Send[0][j - 1] = data0[j][k];
@@ -299,7 +301,7 @@ void DistributedMatrix::sync()
             if (i == 7)
                 k = localX + 1;
 
-            // #pragma omp parallel for
+            #pragma omp parallel for
             for(int j = 1; j < localY + 1; j++)
             {
                 data0[j][k] = tmp2Recv[0][j - 1];
@@ -371,18 +373,18 @@ void DistributedMatrix::makeIter()
         newData1[i] = new double[localX + 2];
     }
 
-    int globI, globJ;
-
-    double hx2 = hx * hx;
-    double hy2 = hy * hy;
-    double fourhxhy = 4.0 * hx * hy;
-    double currTau = currT * tau;
+    long double hx2 = hx * hx;
+    long double hy2 = hy * hy;
+    long double fourhxhy = 4.0 * hx * hy;
+    long double currTau = currT * tau;
 
     #pragma omp parallel for
     for(int i = 1; i < localY + 1; i++)
         for(int j = 1; j < localX + 1; j++)
         {
+            int globI, globJ;
             globalCoord(i - 1, j - 1, globI, globJ);
+
             if ((globJ == 0) || (globJ == N - 1))
             {
                 // u1x - 1 рода, u2x - 1 рода
@@ -394,7 +396,6 @@ void DistributedMatrix::makeIter()
                 // u1y - 2 рода, u2y - периодические
                 double laplasV1 = (data1[i][j - 1] - 2.0 * data1[i][j] + data1[i][j + 1]) / (hx2);
                 double nablaDivV1 = (data1[i - 1][j] - 2.0 * data1[i][j] + data1[i + 1][j]) / (hy2);
-                // laplasV1 += (data1[i - 1][j] - 2.0 * data1[i][j] + data1[i + 1][j]) / (hy * hy);
                 laplasV1 += nablaDivV1;
                 nablaDivV1 += (data0[i + 1][j + 1] - data0[i - 1][j + 1] - data0[i + 1][j - 1] + data0[i - 1][j - 1]) / (fourhxhy);
 
