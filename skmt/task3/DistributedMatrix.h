@@ -227,13 +227,14 @@ void DistributedMatrix::sync()
                 l = localX;
             }
 
+            tmpSend[0] = data0[k][l];
+
             if ((myY == 0) && ((i == 0) || (i == 2)))
                 k++;
 
             if ((myY == procY - 1) && ((i == 4) || (i == 6)))
                 k--;
 
-            tmpSend[0] = data0[k][l];
             tmpSend[1] = data1[k][l];
             
             MPI_Sendrecv(tmpSend, 2, MPI_DOUBLE, neighbours[i], 1, tmpRecv, 2, MPI_DOUBLE, neighbours[(4 + i) % 8], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
