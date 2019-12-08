@@ -1,4 +1,0 @@
-Serial
-    g++ main.cpp -o serial && ./serial 400
-Parallel
-    mpicxx -fopenmp mainParallel.cpp -o parallel && mpirun --hostfile hostfile -np 4 parallel 1300 2 2 2
