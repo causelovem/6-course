@@ -24,6 +24,7 @@ if __name__ == '__main__':
         proc = subprocess.Popen('python3 host.py {}'.format(i), shell=True)
         procList.append(proc)
 
+    # запускаем планировщик
     # proc = subprocess.Popen('python3 schedulerRabbit.py {}'.format(hostCnt), shell=True)
     proc = subprocess.Popen('python3 schedulerRabbitRec.py {}'.format(hostCnt), shell=True)
     procList.append(proc)

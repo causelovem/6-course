@@ -12,7 +12,3 @@ sudo rabbitmqctl start_app
 
 # запускаем программу
 python3 start.py 3
-
-
-# послать сообщение 'snapshot' процессу 0
-# python3 send.py 10 SNAPSHOT

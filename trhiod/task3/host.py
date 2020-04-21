@@ -19,6 +19,7 @@ if __name__ == '__main__':
 
     myNeed = cfg.maxNeed[hostId]
 
+    # посылаем свои максимальные нужны # id ('#' как разделитель)
     channel.basic_publish(exchange='', routing_key=queue, body=str(myNeed) + '#' + str(hostId))
 
     connection.close()
