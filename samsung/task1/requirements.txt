@@ -2,7 +2,7 @@ torch==1.3.0
 pandas==0.24.1
 matplotlib==3.0.3
 pydicom==1.3.0
-opencv_python==4.1.1.26
+opencv_python==4.2.0.32
 torchvision==0.4.1
 numpy==1.17.2
 tqdm==4.23.4
